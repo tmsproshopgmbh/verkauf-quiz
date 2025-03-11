@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verkaufs Quiz 1</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            background-color: #f0f2f5;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .quiz-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .quiz-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .quiz-header h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 2em;
+        }
+
+        .progress-container {
+            width: 100%;
+            height: 10px;
+            background-color: #e0e0e0;
+            border-radius: 5px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background-color: #3498db;
+            transition: width 0.3s ease;
+            width: 0%;
+        }
+
+        .email-container {
+            background-color: #f8f9fa;
+            border-left: 4px solid #3498db;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .question {
+            font-size: 1.2em;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+
+        .btn-container {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            background-color: #cccccc;
+            transform: none !important;
+        }
+
+        .btn-answer {
+            background-color: #3498db;
+            color: white;
+            min-width: 120px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-answer:hover:not(:disabled) {
+            background-color: #2980b9;
+            transform: translateY(-2px);
+        }
+
+        .btn-answer:active:not(:disabled) {
+            transform: translateY(0);
+        }
+
+        .btn-nav {
+            background-color: #2ecc71;
+            color: white;
+            min-width: 100px;
+        }
+
+        .btn-nav:hover:not(:disabled) {
+            background-color: #27ae60;
+            transform: translateY(-2px);
+        }
+
+        .btn-nav:disabled {
+            background-color: #95a5a6;
+        }
+
+        .btn-restart {
+            background-color: #e74c3c;
+            color: white;
+            min-width: 150px;
+        }
+
+        .btn-restart:hover {
+            background-color: #c0392b;
+            transform: translateY(-2px);
+        }
+
+        .feedback {
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 5px;
+            display: none;
+            font-weight: 500;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .feedback.correct {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .feedback.incorrect {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .explanation {
+            background-color: #e8f4f8;
+            padding: 20px;
+            margin-top: 20px;
+            border-radius: 5px;
+            display: none;
+            border-left: 4px solid #3498db;
+            animation: slideIn 0.3s ease;
+        }
+
+        .score-display {
+            text-align: center;
+            font-size: 1.2em;
+            margin: 20px 0;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .score-display h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+
+        /* Animationen */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(-20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        /* E-Mail Styling */
+        .email-container b {
+            color: #34495e;
+        }
+
+        .email-container a {
+            color: #3498db;
+            text-decoration: none;
+        }
+
+        .email-container a:hover {
+            text-decoration: underline;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 600px) {
+            .quiz-container {
+                padding: 15px;
+                margin: 10px;
+            }
+
+            .btn-container {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+                margin: 5px 0;
+            }
+
+            .quiz-header h1 {
+                font-size: 1.5em;
+            }
+
+            .question {
+                font-size: 1.1em;
+            }
+
+            .email-container {
+                padding: 15px;
+            }
+
+            .feedback, .explanation {
+                padding: 15px;
+            }
+        }
+
+        /* Zusätzliche Verbesserungen */
+        .quiz-container {
+            transition: all 0.3s ease;
+        }
+
+        .quiz-container:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .explanation ul {
+            margin-left: 20px;
+            margin-top: 10px;
+        }
+
+        .explanation li {
+            margin-bottom: 5px;
+        }
+
+        /* Verbessertes Feedback-Design */
+        .feedback::before {
+            margin-right: 10px;
+            font-weight: bold;
+        }
+
+        .feedback.correct::before {
+            content: "✓";
+        }
+
+        .feedback.incorrect::before {
+            content: "✗";
+        }
+    </style>
+</head>
+<body>
+<div class="quiz-container">
+    <div class="quiz-header">
+        <h1>Verkaufs Quiz 1</h1>
+        <div class="progress-container">
+            <div class="progress-bar" id="progress"></div>
+        </div>
+    </div>
+
+    <div id="quiz-content">
+        <div class="question" id="question"></div>
+        <div class="email-container" id="email-content"></div>
+
+        <div class="btn-container" id="answer-buttons">
+            <button class="btn btn-answer" onclick="submitAnswer(true)">Ja</button>
+            <button class="btn btn-answer" onclick="submitAnswer(false)">Nein</button>
+        </div>
+
+        <div class="feedback" id="feedback"></div>
+        <div class="explanation" id="explanation"></div>
+
+        <div class="btn-container" id="navigation-buttons">
+            <button class="btn btn-nav" id="prev-btn" onclick="previousQuestion()" style="display: none;">Zurück</button>
+            <button class="btn btn-nav" id="next-btn" onclick="nextQuestion()" style="display: none;">Weiter</button>
+            <button class="btn btn-restart" id="restart-btn" onclick="restartQuiz()" style="display: none;">Quiz neu starten</button>
+        </div>
+    </div>
+
+    <div id="final-score" class="score-display" style="display: none;"></div>
+</div>
+<script>
+    // Quiz-Daten mit aktuellem Timestamp und Benutzer
+    const quizMetadata = {
+        timestamp: "2025-02-10 15:42:04",
+        user: "tilmannTMS"
+    };
+
+    const quizData = [
+        {
+            question: "Ist diese Aussage korrekt?",
+            email: "Unser ERP-System heißt SAP.",
+            isAuthentic: false,
+            explanation: "SAP ist kein ERP-System und wird von Kroschke genutzt.<br><b>Wir nutzen als ERP-System WeClapp.</b>",
+            lastAnswer: undefined
+        },
+		{
+            question: "Ist diese Aussage korrekt?",
+            email: "Wir haben insgesamt 8 Shops.",
+            isAuthentic: false,
+            explanation: "Wir haben nur <b>6</b> Shops<br> Unsere Schops sind: der Erstehilfeshop, der Abssperrshop, der Markierungsshop, der Rammschutzshop, der Verkehrsschilder-Discounter und der Leitplanken-Discoaunter.",
+            lastAnswer: undefined
+        },
+		{
+            question: "Ist diese Aussage korrekt?",
+            email: "Abgesehen von unseren Shops können Kunden auch über die Plattformen Idealo und Amazon bestellen.",
+            isAuthentic: false,
+            explanation: "Neben unseren Shops haben wir noch die Marketplaces Ebay, Amazon und Unite (früher Mercateo).",
+            lastAnswer: undefined
+        },
+		{
+            question: "Ist diese Aussage korrekt?",
+            email: "Der Verkehsschilder- und Leitplanken-Discoaunter basieren auf WordPress.",
+            isAuthentic: true,
+            explanation: "Nur diese beiden basieren darauf.<br>Die anderen vier Shops basieren auf dem <b>Magento-System</b>",
+            lastAnswer: undefined
+        },
+		{
+            question: "Ist diese Aussage korrekt?",
+            email: "Wenn im Slack Messenger ein Kollege einen Muskelarm-Emoji schreibt, bedeutet dass er sich gerade Bestellungen in sein Bearbeitungspostfach zieht.",
+            isAuthentic: true,
+            explanation: "Der Muskelarm ist unser internes Zeichen im Verkauf, dass sich Bestellungen gezogen werden.<br>Zusätzlich haben wir noch die <b>Rakete</b> um zu signalisieren, dass man die eingegangene Turbo-Mail bearbeitet.",
+            lastAnswer: undefined
+        },
+		{
+            question: "Ist diese Aussage korrekt?",
+            email: "Sobald eine Turbo-Mail eingeht, haben wir zur Bearbeitung einen Werktag zeit.",
+            isAuthentic: false,
+            explanation: "Wir sind dazu angehalten eine Turbo-Mail innerhalb von 15 Minuten zu beantworten.<br>Bei komplizierteren Anliegen antworten wir dem Kunden erstmal, dass wir sein Anliegen prüfen/bearbeiten aber dafür noch etwas Zeit benötigen, um die 15 Minuten einzuhalten.<br>Danach haben wir mehr Zeit für die Anfrage.",
+            lastAnswer: undefined
+        },
+		{
+            question: "Ist diese Aussage korrekt?",
+            email: "Die Artikelnummern aus dem Leitplanken-Discounter und dem Rammschutzshop sind identisch.",
+            isAuthentic: false,
+            explanation: "Grundsätzlich sind die Zahlen die selben.<br>Allerdings wurden im Leitplanken-Discoaunter die Artikelnummern um ein <b>LD</b>, einem <b>Punkt (.)</b> und einem <b>Bindestrich(-)</b> ergänzt.",
+            lastAnswer: undefined
+        },
+		{
+            question: "Ist diese Aussage korrekt?",
+            email: "Ein Privatkunde kann auf Rechnung bestellen.",
+            isAuthentic: false,
+            explanation: "Lediglich <b>Lastschrift, Kreditkarte und PayPal</b> stehen Privatkunden bei Ihrer Bestellung als Zahlungsart zur Verfügung.",
+            lastAnswer: undefined
+        },
+		{
+            question: "Ist diese Aussage korrekt?",
+            email: "Ab 180€ Nettowarenwert liefern wir Versandkostenfrei.",
+            isAuthentic: true,
+            explanation: "",
+            lastAnswer: undefined
+        },
+		{
+            question: "Ist diese Aussage korrekt?",
+            email: "Wir vrsenden unsere Waren mit DHL und Hellmann.",
+            isAuthentic: false,
+            explanation: "Unsere Versanddienstleister sind DPD und Hellmann.",
+            lastAnswer: undefined
+        },
+		{
+            question: "Ist diese Aussage korrekt?",
+            email: "Wir liefern innerhalb von ganz Europa.",
+            isAuthentic: false,
+            explanation: "Liefern tun wir <b>ausschließlich</b> innerhalb Deutschlands, Österreich und der Schweiz",
+            lastAnswer: undefined
+        },
+		{
+            question: "Ist diese Aussage korrekt?",
+            email: "Versandkostenfrei liefern wir aber nur in Deutschland und Österreich.",
+            isAuthentic: true,
+            explanation: "Der Versand in die Schweiz ist mit hohen Kosten verbunden. Damit sich also ein Auftrag rentiert, müssen wir also immer Versandkosten berechnen.",
+            lastAnswer: undefined
+        },
+		{
+            question: "Ist diese Aussage korrekt?",
+            email: "Bestellungen müssen bis 17 Uhr in WeClapp erfasst sein, damit sie am nächsten Tag geliefert werden.",
+            isAuthentic: false,
+            explanation: "Bis <b>16 Uhr</b> müssen die Bestellungen erfasst werden, damit wir unser <b>Lieferversprechen</b> von einem Tag einhalten können.<br>Daher werden ab 16 Uhr auch keine weiteren Bestellungen mehr ins System eingepflegt.",
+            lastAnswer: undefined
+        },
+		{
+            question: "Ist diese Aussage korrekt?",
+            email: "Bei Aufträgen mit einem Auftragswert von 1.500€+ netto muss nichts unternommen werden.",
+            isAuthentic: false,
+            explanation: "Ab einem Nettoauftragswert von <b>1.500€</b> sind wir angewiesen, eine Auskunft bei Creditreform einzuholen.<br>Eine normale <b>Ampelauskunft</b> reicht aus. Ab einem Nettowarenwert von <b>5.000€</b> müssen wir eine <b>Kurzauskunft</b> einholen.<br>Die Kurzauskunft ist ausführlicher und gibt neben den erweiterten Bonitätsklassen auch das Kreditlimit, sowie vorhandene negativ Merkmale wieder.<br>Es hat sich aber auch schon das Bauchgefühl bei Aufträgen unter 5.000€ bewährt.",
+            lastAnswer: undefined
+        },
+		{
+            question: "Ist diese Aussage korrekt?",
+            email: "Sobald eine Bestellung eingeht, muss geprüft werden ob wir den Kunden bereits in unserem ERP-System eingepflegt haben.",
+            isAuthentic: true,
+            explanation: "Egal ob B2B- oder B2C-Kunde, es muss immer bei einer Bestellung nachgeschaut werden ob wir diesen Kunden bereits haben oder ob ein Neukunde bestellt.",
+            lastAnswer: undefined
+        },
+		{
+            question: "Ist diese Aussage korrekt?",
+            email: "Wenn Neukunden bestellen, kann ich diese direkt in unserem ERP-System anlegen.",
+            isAuthentic: false,
+            explanation: "Sobald ein Neukunde eine Bestellung auslöst, muss zuerst geprüft werden ob das Unternehmen wirklich existiert und ob die angegebenen Daten korrekt sind (Google).<br>Wenn die Daten nicht stimmen oder das Unternehmen nicht auffindbar ist, muss ein <b>Nachweis</b> in Form eines <b>Gewerbescheins, Handelsregisterauszuges</b> oder Ähnlichem eingeholt werden.<br>Vorher darf der Auftrag nicht weiter bearbeitet werden.",
+            lastAnswer: undefined
+        },
+		{
+            question: "Ist diese Aussage korrekt?",
+            email: "Wenn ein Neukunde keinen Nachweis erbringen kann, wird der Auftrag automatisch storniert.",
+            isAuthentic: false,
+            explanation: "Sollte der Kunde keinen oder einen nicht ausreichenden Nachweis erbringen, so können wir Ihm immer noch einen Kauf per <b>Vorkasse</b> oder eines <b>PayPal-Me-Links</b> anbieten.<br>Erst wenn der Kunde dies ablehnt wird der Auftrag/Bestellung storniert.<br>Anschließend schreiben wir dem Kunden per Mail, dass der Auftrag storniert wurde.",
+            lastAnswer: undefined
+        },
+		{
+            question: "Ist diese Aussage korrekt?",
+            email: "Wenn ein Kundenstamm im ERP-System als 'Gesperrt' markiert wurde, frage ich den Senior wie das weitere Vorgehen ist.",
+            isAuthentic: false,
+            explanation: "Sollte ein Kunde als gesperrt markiert sein, so prüfen wir den Sperrvermerkt.<br>Sollte dort nichts drin stehen, können wir Ihn wieder entsperren.<br> Wenn dort eine Mahnungsstufe eingetragen ist, ohne das diese wieder vom System aufgehoben wurde, fragen wir die <b>FiBu</b> nach offenen Poste.<br><b>Egal</b> ob die Rechnungen im Kundenstamm als bezahlt gekennzeichnet sind oder noch offene existieren.",
+            lastAnswer: undefined
+        },
+		{
+            question: "Ist diese Aussage korrekt?",
+            email: "Wir vergeben Rabatte nur bei Angebotsanfragen.",
+            isAuthentic: true,
+            explanation: "Wir gewähren Rabatte nur bei Angebotsanfragen, zur Hilfe nehmen wir uns dabei die Rabatttabelle, die unter dem Pfad:<br><b>U:\Anleitung & Baukasten\Verkauf\V041a TMS Informationen für den Verkauf.pdf</b><br>zu finden ist.<br>Bei Aufträgen haben Kunden nur die Möglichkeit einen Rabatt zu erlagen, wenn sie bei der Bestellung einen Rabattcode eingeben.",
+            lastAnswer: undefined
+        },
+		{
+            question: "Ist diese Aussage korrekt?",
+            email: "Wenn der Angebotswert unsere Rabattstaffel übersteigt, wird dem Kunden automatisch der höchste Rabatt angeboten.",
+            isAuthentic: false,
+            explanation: "In diesem Fall muss <b>David</b> per Mail kontaktiert werden, damit er einen Rabatt berechnet. Ist David nicht erreichbar, wird <b>Sebastian</b> gefrage.<br>Sollten beide mal nicht zur Verfügung stehen ist <b>Sarah</b> die letzte Instanz.<br>Wir müssen aber in allen Fällen eine <b>Kalkulationstabelle</b> in Excel ausfüllen und diese mit übersenden.",
+            lastAnswer: undefined
+        },
+    ];
+
+    // Quiz-Zustandsvariablen
+    let currentQuestionIndex = 0;
+    let score = 0;
+    let answeredQuestions = new Array(quizData.length).fill(false);
+
+    // Hilfsfunktionen
+    function updateProgressBar() {
+        const progress = document.getElementById('progress');
+        const percentage = ((currentQuestionIndex + 1) / quizData.length) * 100;
+        progress.style.width = `${percentage}%`;
+    }
+
+    function getElement(id) {
+        return document.getElementById(id);
+    }
+
+    // Hauptfunktionen des Quiz
+    function displayQuestion() {
+        const currentQuestion = quizData[currentQuestionIndex];
+        getElement('question').textContent = currentQuestion.question;
+        getElement('email-content').innerHTML = currentQuestion.email;
+        getElement('feedback').style.display = 'none';
+        getElement('explanation').style.display = 'none';
+
+        // Update navigation buttons - Überarbeitete Navigation
+        const prevButton = getElement('prev-btn');
+        const nextButton = getElement('next-btn');
+
+        prevButton.style.display = 'block';
+        nextButton.style.display = 'block';
+
+        // Deaktiviere Prev-Button wenn auf erster Frage
+        prevButton.disabled = currentQuestionIndex === 0;
+
+        // Enable/disable answer buttons
+        const answerButtons = document.querySelectorAll('.btn-answer');
+        answerButtons.forEach(button => {
+            button.disabled = answeredQuestions[currentQuestionIndex];
+        });
+
+        // Show feedback and explanation if question was already answered
+        if (answeredQuestions[currentQuestionIndex]) {
+            const feedbackElement = getElement('feedback');
+            const wasCorrect = currentQuestion.lastAnswer === currentQuestion.isAuthentic;
+            feedbackElement.textContent = wasCorrect ? "Richtig!" : "Falsch!";
+            feedbackElement.className = `feedback ${wasCorrect ? 'correct' : 'incorrect'}`;
+            feedbackElement.style.display = 'block';
+
+            getElement('explanation').innerHTML = currentQuestion.explanation;
+            getElement('explanation').style.display = 'block';
+        }
+
+        updateProgressBar();
+    }
+
+    function submitAnswer(userAnswer) {
+        if (answeredQuestions[currentQuestionIndex]) return;
+
+        const currentQuestion = quizData[currentQuestionIndex];
+        const isCorrect = userAnswer === currentQuestion.isAuthentic;
+
+        // Speichere die gegebene Antwort
+        currentQuestion.lastAnswer = userAnswer;
+        answeredQuestions[currentQuestionIndex] = true;
+
+        if (isCorrect) score++;
+
+        // Show feedback
+        const feedbackElement = getElement('feedback');
+        feedbackElement.textContent = isCorrect ? "Richtig!" : "Falsch!";
+        feedbackElement.className = `feedback ${isCorrect ? 'correct' : 'incorrect'}`;
+        feedbackElement.style.display = 'block';
+
+        // Show explanation
+        const explanationElement = getElement('explanation');
+        explanationElement.innerHTML = currentQuestion.explanation;
+        explanationElement.style.display = 'block';
+
+        // Show next button if not last question
+        getElement('next-btn').style.display = 'block';
+
+        // Disable answer buttons
+        const answerButtons = document.querySelectorAll('.btn-answer');
+        answerButtons.forEach(button => button.disabled = true);
+    }
+
+    function previousQuestion() {
+        if (currentQuestionIndex > 0) {
+            currentQuestionIndex--;
+            displayQuestion();
+        }
+    }
+
+    function nextQuestion() {
+        if (currentQuestionIndex < quizData.length - 1) {
+            currentQuestionIndex++;
+            displayQuestion();
+        } else {
+            showFinalScore();
+        }
+    }
+
+    function showFinalScore() {
+        getElement('quiz-content').style.display = 'none';
+        const percentage = Math.round((score / quizData.length) * 100);
+
+        const finalScoreElement = getElement('final-score');
+        finalScoreElement.innerHTML = `
+        <h2>Quiz beendet!</h2>
+        <p>Sie haben ${score} von ${quizData.length} Fragen richtig beantwortet.</p>
+        <p>Das entspricht ${percentage}%</p>
+        <div class="btn-container">
+            <button class="btn btn-restart" onclick="restartQuiz()">Quiz neu starten</button>
+            <button class="btn btn-nav" onclick="reviewQuiz()">Antworten überprüfen</button>
+        </div>
+    `;
+        finalScoreElement.style.display = 'block';
+
+        // Save quiz results
+        const results = {
+            timestamp: quizMetadata.timestamp,
+            user: quizMetadata.user,
+            score: score,
+            totalQuestions: quizData.length,
+            percentage: percentage
+        };
+        console.log('Quiz Results:', results);
+    }
+
+    function reviewQuiz() {
+        getElement('final-score').style.display = 'none';
+        getElement('quiz-content').style.display = 'block';
+        currentQuestionIndex = 0;
+        displayQuestion();
+    }
+
+    function restartQuiz() {
+        currentQuestionIndex = 0;
+        score = 0;
+        answeredQuestions = new Array(quizData.length).fill(false);
+        quizData.forEach(question => question.lastAnswer = undefined);
+        getElement('quiz-content').style.display = 'block';
+        getElement('final-score').style.display = 'none';
+        displayQuestion();
+    }
+
+    // Initialize quiz
+    window.onload = function () {
+        displayQuestion();
+        console.log('Quiz started at:', quizMetadata.timestamp);
+        console.log('User:', quizMetadata.user);
+    };
+</script>
+</body>
+</html>

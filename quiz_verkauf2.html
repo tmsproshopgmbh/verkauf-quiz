@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verkaufs Quiz 2</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            background-color: #f0f2f5;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .quiz-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .quiz-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .quiz-header h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 2em;
+        }
+
+        .progress-container {
+            width: 100%;
+            height: 10px;
+            background-color: #e0e0e0;
+            border-radius: 5px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background-color: #3498db;
+            transition: width 0.3s ease;
+            width: 0%;
+        }
+
+        .email-container {
+            background-color: #f8f9fa;
+            border-left: 4px solid #3498db;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .question {
+            font-size: 1.2em;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+
+        .btn-container {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            background-color: #cccccc;
+            transform: none !important;
+        }
+
+        .btn-answer {
+            background-color: #3498db;
+            color: white;
+            min-width: 120px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-answer:hover:not(:disabled) {
+            background-color: #2980b9;
+            transform: translateY(-2px);
+        }
+
+        .btn-answer:active:not(:disabled) {
+            transform: translateY(0);
+        }
+
+        .btn-nav {
+            background-color: #2ecc71;
+            color: white;
+            min-width: 100px;
+        }
+
+        .btn-nav:hover:not(:disabled) {
+            background-color: #27ae60;
+            transform: translateY(-2px);
+        }
+
+        .btn-nav:disabled {
+            background-color: #95a5a6;
+        }
+
+        .btn-restart {
+            background-color: #e74c3c;
+            color: white;
+            min-width: 150px;
+        }
+
+        .btn-restart:hover {
+            background-color: #c0392b;
+            transform: translateY(-2px);
+        }
+
+        .feedback {
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 5px;
+            display: none;
+            font-weight: 500;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .feedback.correct {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .feedback.incorrect {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .explanation {
+            background-color: #e8f4f8;
+            padding: 20px;
+            margin-top: 20px;
+            border-radius: 5px;
+            display: none;
+            border-left: 4px solid #3498db;
+            animation: slideIn 0.3s ease;
+        }
+
+        .score-display {
+            text-align: center;
+            font-size: 1.2em;
+            margin: 20px 0;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .score-display h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+
+        /* Animationen */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(-20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        /* E-Mail Styling */
+        .email-container b {
+            color: #34495e;
+        }
+
+        .email-container a {
+            color: #3498db;
+            text-decoration: none;
+        }
+
+        .email-container a:hover {
+            text-decoration: underline;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 600px) {
+            .quiz-container {
+                padding: 15px;
+                margin: 10px;
+            }
+
+            .btn-container {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+                margin: 5px 0;
+            }
+
+            .quiz-header h1 {
+                font-size: 1.5em;
+            }
+
+            .question {
+                font-size: 1.1em;
+            }
+
+            .email-container {
+                padding: 15px;
+            }
+
+            .feedback, .explanation {
+                padding: 15px;
+            }
+        }
+
+        /* Zusätzliche Verbesserungen */
+        .quiz-container {
+            transition: all 0.3s ease;
+        }
+
+        .quiz-container:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .explanation ul {
+            margin-left: 20px;
+            margin-top: 10px;
+        }
+
+        .explanation li {
+            margin-bottom: 5px;
+        }
+
+        /* Verbessertes Feedback-Design */
+        .feedback::before {
+            margin-right: 10px;
+            font-weight: bold;
+        }
+
+        .feedback.correct::before {
+            content: "✓";
+        }
+
+        .feedback.incorrect::before {
+            content: "✗";
+        }
+    </style>
+</head>
+<body>
+<div class="quiz-container">
+    <div class="quiz-header">
+        <h1>Verkaufs Quiz 2</h1>
+        <div class="progress-container">
+            <div class="progress-bar" id="progress"></div>
+        </div>
+    </div>
+
+    <div id="quiz-content">
+        <div class="question" id="question"></div>
+        <div class="email-container" id="email-content"></div>
+
+        <div class="btn-container" id="answer-buttons">
+            <button class="btn btn-answer" onclick="submitAnswer(true)">Ja</button>
+            <button class="btn btn-answer" onclick="submitAnswer(false)">Nein</button>
+        </div>
+
+        <div class="feedback" id="feedback"></div>
+        <div class="explanation" id="explanation"></div>
+
+        <div class="btn-container" id="navigation-buttons">
+            <button class="btn btn-nav" id="prev-btn" onclick="previousQuestion()" style="display: none;">Zurück</button>
+            <button class="btn btn-nav" id="next-btn" onclick="nextQuestion()" style="display: none;">Weiter</button>
+            <button class="btn btn-restart" id="restart-btn" onclick="restartQuiz()" style="display: none;">Quiz neu starten</button>
+        </div>
+    </div>
+
+    <div id="final-score" class="score-display" style="display: none;"></div>
+</div>
+<script>
+    // Quiz-Daten mit aktuellem Timestamp und Benutzer
+    const quizMetadata = {
+        timestamp: "2025-02-10 15:42:04",
+        user: "tilmannTMS"
+    };
+
+    const quizData = [
+        {
+            question: "Ist diese Aussage korrekt?",
+            email: "Ein Artikel in WeClapp hat ein Äquivalent in SAP.",
+            isAuthentic: true,
+            explanation: "Es gibt zu jedem Artikel in WeClapp mit Artikelnummer einen sog. K-Artikel in SAP.<br>Die K-Artikelnummer ist exakt die gleiche die auch im SAP hinterlegt ist.",
+            lastAnswer: undefined
+        },
+		{
+            question: "Ist diese Aussage korrekt?",
+            email: "Ein WeClapp Artikel besteht genau aus einem SAP K-Artikel.",
+            isAuthentic: false,
+            explanation: "Ein Artikel in WeClapp kann zwar aus nur einem SAP K-Artikel bestehen, in den meisten Fällen jedoch besteht er aus mindestens zwei Artikeln. (Häufig aus Prüfplakette und den eigentlichen Artikel.)<br>Unsere Sets bestehen daher aus mehreren K-Artikeln, gut daran zu erkennen, dass im Auftrag die Hauptposition mehrere Unterpositionen hat z.B. „Pos. 1.3“",
+            lastAnswer: undefined
+        },
+		{
+            question: "Ist diese Aussage korrekt?",
+            email: "Die Lieferantenselbstauskunft liegt auf unserem Austausch-Laufwerk.",
+            isAuthentic: false,
+            explanation: "Sie ist auf dem „Economy“-Laufwerk unter folgendem Pfad zu finden: <b>U:\Anleitung & Baukasten\Verkauf\V038a TMS-Auf-Einen-Blick-Lieferantenselbstauskunft.pdf</b>",
+            lastAnswer: undefined
+        },
+		{
+            question: "Ist diese Aussage korrekt?",
+            email: "Bei einer Scherlock-Benachrichtigung musst du den Auftrag noch mal bestätigen.",
+            isAuthentic: false,
+            explanation: "Wenn du eine Scherlock-Mitteilung per Mail (deine persönliche TMS-Mail) bekommst, musst du in den Auftrag noch mal reinschauen und die Hinweise aus der Mail in das Kommentarfeld eintragen. Anschließend schreibst du zu jedem Hinweis von Sherlock eine Info.<br>Nachdem du alle Hinweise bearbeitet hast, entscheidest du, ob der Auftrag freigegeben werden kann oder du noch mal Rücksprache mit dem Team und/oder dem Kunden hältst.<br>Im schlimmsten Fall kann der Kunde nicht auf Rechnung kaufen und muss in Vorkasse treten.Zum Schluss muss du den Haken bei „Nicht an KSI senden“ rausnehmen und das Kundenkonto entsperren.",
+            lastAnswer: undefined
+        },
+		{
+            question: "Ist diese Aussage korrekt?",
+            email: "Nachdem du bei einer Bestellung alles erfasst hast, zeigt dir der farbige Kreis, ob die Ware auf Lager ist.",
+            isAuthentic: true,
+            explanation: "Die Farben des Kreises geben über den Verfügbarkeitsstatus der Bestellung bzw. der Artikel Auskunft.<br>Grün heißt es ist alles in der gewünschten Menge verfügbar.<br>Gelb sagt aus, dass Artikel zwar noch Lagerbestand haben aber dieser nicht die Nachfrage deckt.<br>Rot sagt, dass alle Positionen bzw. der Artikel einen Lagerbestand von null aufweist.",
+            lastAnswer: undefined
+        },
+		{
+            question: "Ist diese Aussage korrekt?",
+            email: "Wir bieten auch Expressversand an.",
+            isAuthentic: true,
+            explanation: "Hierbei ist zu beachten, dass der Kunden keinen Expressversand bei der Bestellung auswählen kann. Er wird nur in Ausnahmefällen dem Kunden angeboten, zudem müssen ein paar Dinge dabei beachtet werden.<br>- Der Kunde muss über die zusätzlichen Kosten informiert werden. (DPD: 33€ / HWL: 126,50€)<br>- Eine Express-Next-Day-Lieferung kann nur garantiert werden, wenn die Bestellung mit korrekt eingetragenem Versand bis spätestens 10 Uhr bei KSI angekommen ist (Haken durch TOJA bei Informationen an KSI).",
+            lastAnswer: undefined
+        },
+		{
+            question: "Ist diese Aussage korrekt?",
+            email: "Wenn ein Kunde ein Avis für die Lieferung anfordert, musst du die Telefonnummer mit dem vorgestellten Zusatz „Avis:“ in das Kommissionsfeld bei der Auftragserfassung eingetragen.",
+            isAuthentic: true,
+            explanation: "Wenn du nur die Telefonnummer einträgst ohne den Zusatz „Avis:“ davor, wird die Telefonnummer des Kunden zwar an den Spediteur übertragen aber es wurde trotzdem keine Erlaubnis für ein AVIS erteilt.",
+            lastAnswer: undefined
+        },
+		{
+            question: "Ist diese Aussage korrekt?",
+            email: "Bestellungen mit einem Auftragswert unter 150 € ist für uns bereits profitabel.",
+            isAuthentic: false,
+            explanation: "Erst ab einem Auftragswert von 245 € machen wir „Gewinn“. Bei Aufträgen zwischen 105 € - 245 € gehen wir ungefähr mit +- Null raus. Alle Aufträge unter 105 € sind für uns defizitär.",
+            lastAnswer: undefined
+        },
+		{
+            question: "Ist diese Aussage korrekt?",
+            email: "Bei einem Brutto-Gesamtgewicht von 21 kg erfolgt die Lieferung automatisch durch den Spediteur.",
+            isAuthentic: false,
+            explanation: "In der Regel gibt DPD selber an, dass Sie Pakete bis 31,5 kg versenden. Allerdings sieht es in der Realität etwas anders aus. Es kommt auch auf die Größe, Form, Beschaffenheit der Artikel an und ob es ein Gefahrengut ist.",
+            lastAnswer: undefined
+        },
+		{
+            question: "Ist diese Aussage korrekt?",
+            email: "Wenn ein Kunde eine Word-Datei als Angebotsanfrage übersendet, bitten wir Ihn uns das Dokument als PDF-Datei zukommen zu lassen.",
+            isAuthentic: true,
+            explanation: "Wir bevorzugen PDF-Dateien, da diese als sicheres Dateiformat anerkannt sind.",
+            lastAnswer: undefined
+        },
+		{
+            question: "Ist diese Aussage korrekt?",
+            email: "Wir nehmen die Ware nicht zurück, wenn der Kunde sich nach 6 Monaten meldet und die Ware retournieren möchte.",
+            isAuthentic: true,
+            explanation: "Wir nehmen Ware nur anstandslos zurück, sofern der Kunde diese innerhalb von 14 Tagen retourniert. Sobald die Retoure aufgrund eines Verschuldens unserer Seite zustande kommt, nehmen wir diese immer zurück.",
+            lastAnswer: undefined
+        },
+		{
+            question: "Ist diese Aussage korrekt?",
+            email: "Wenn wir an einer Retoure Schuld haben, muss der Kunde diese auf eigene Kosten veranlassen.",
+            isAuthentic: false,
+            explanation: "Sobald wir eine Retoure zu verschulden haben, erhält der Kunde ein Retourenlabel von uns.",
+            lastAnswer: undefined
+        },
+		{
+            question: "Ist diese Aussage korrekt?",
+            email: "Ein Kunde teilt uns per Mail mit, dass er die Ware auf eigene Kosten zurückschickt. Wir legen die Mail einfach beim Auftrag ab.",
+            isAuthentic: false,
+            explanation: "Zu erst Kommentieren wir in dem Auftrag, dass der Kunde die Ware zurückschickt, evtl. falls bekannt auch den Grund und dass er dies auf eigene Kosten tut. Anschließend drucken wir einen Screenshot für die Retouren-Mappe aus und legen diesen darin ab.",
+            lastAnswer: undefined
+        },
+		{
+            question: "Ist diese Aussage korrekt?",
+            email: "Wenn eine Retoure bei uns ankommt, nehmen wir den Zettel aus der Retouren-Mappe und kleben ihn auf das Paket.",
+            isAuthentic: true,
+            explanation: "Der Zettel hift KSI dabei die Retoure zu identifizieren und eine Gutschrift zu erstellen.<br>Sollte kein Zettel in der Retouren-Mappe liegen oder nicht eindeutig zuordbar sein, müssen wir in WeClapp nach dem Auftrag suchen und ggf. einen Screenshot ausdrucken.",
+            lastAnswer: undefined
+        },
+		{
+            question: "Ist diese Aussage korrekt?",
+            email: "Wenn eine Retoure auf Palette von einem Spediteur geliefert wird, ziehen wir diese hinter das Büro auf unsere Sammelfläche.",
+            isAuthentic: false,
+            explanation: "Wir haben keine Sammelfläche für Paletten. Der Fahrer wird von uns angewiesen zum Kroschke-Lager zu fahren und die Palette beim Wareneingang abzuladen.",
+            lastAnswer: undefined
+        },
+    ];
+
+    // Quiz-Zustandsvariablen
+    let currentQuestionIndex = 0;
+    let score = 0;
+    let answeredQuestions = new Array(quizData.length).fill(false);
+
+    // Hilfsfunktionen
+    function updateProgressBar() {
+        const progress = document.getElementById('progress');
+        const percentage = ((currentQuestionIndex + 1) / quizData.length) * 100;
+        progress.style.width = `${percentage}%`;
+    }
+
+    function getElement(id) {
+        return document.getElementById(id);
+    }
+
+    // Hauptfunktionen des Quiz
+    function displayQuestion() {
+        const currentQuestion = quizData[currentQuestionIndex];
+        getElement('question').textContent = currentQuestion.question;
+        getElement('email-content').innerHTML = currentQuestion.email;
+        getElement('feedback').style.display = 'none';
+        getElement('explanation').style.display = 'none';
+
+        // Update navigation buttons - Überarbeitete Navigation
+        const prevButton = getElement('prev-btn');
+        const nextButton = getElement('next-btn');
+
+        prevButton.style.display = 'block';
+        nextButton.style.display = 'block';
+
+        // Deaktiviere Prev-Button wenn auf erster Frage
+        prevButton.disabled = currentQuestionIndex === 0;
+
+        // Enable/disable answer buttons
+        const answerButtons = document.querySelectorAll('.btn-answer');
+        answerButtons.forEach(button => {
+            button.disabled = answeredQuestions[currentQuestionIndex];
+        });
+
+        // Show feedback and explanation if question was already answered
+        if (answeredQuestions[currentQuestionIndex]) {
+            const feedbackElement = getElement('feedback');
+            const wasCorrect = currentQuestion.lastAnswer === currentQuestion.isAuthentic;
+            feedbackElement.textContent = wasCorrect ? "Richtig!" : "Falsch!";
+            feedbackElement.className = `feedback ${wasCorrect ? 'correct' : 'incorrect'}`;
+            feedbackElement.style.display = 'block';
+
+            getElement('explanation').innerHTML = currentQuestion.explanation;
+            getElement('explanation').style.display = 'block';
+        }
+
+        updateProgressBar();
+    }
+
+    function submitAnswer(userAnswer) {
+        if (answeredQuestions[currentQuestionIndex]) return;
+
+        const currentQuestion = quizData[currentQuestionIndex];
+        const isCorrect = userAnswer === currentQuestion.isAuthentic;
+
+        // Speichere die gegebene Antwort
+        currentQuestion.lastAnswer = userAnswer;
+        answeredQuestions[currentQuestionIndex] = true;
+
+        if (isCorrect) score++;
+
+        // Show feedback
+        const feedbackElement = getElement('feedback');
+        feedbackElement.textContent = isCorrect ? "Richtig!" : "Falsch!";
+        feedbackElement.className = `feedback ${isCorrect ? 'correct' : 'incorrect'}`;
+        feedbackElement.style.display = 'block';
+
+        // Show explanation
+        const explanationElement = getElement('explanation');
+        explanationElement.innerHTML = currentQuestion.explanation;
+        explanationElement.style.display = 'block';
+
+        // Show next button if not last question
+        getElement('next-btn').style.display = 'block';
+
+        // Disable answer buttons
+        const answerButtons = document.querySelectorAll('.btn-answer');
+        answerButtons.forEach(button => button.disabled = true);
+    }
+
+    function previousQuestion() {
+        if (currentQuestionIndex > 0) {
+            currentQuestionIndex--;
+            displayQuestion();
+        }
+    }
+
+    function nextQuestion() {
+        if (currentQuestionIndex < quizData.length - 1) {
+            currentQuestionIndex++;
+            displayQuestion();
+        } else {
+            showFinalScore();
+        }
+    }
+
+    function showFinalScore() {
+        getElement('quiz-content').style.display = 'none';
+        const percentage = Math.round((score / quizData.length) * 100);
+
+        const finalScoreElement = getElement('final-score');
+        finalScoreElement.innerHTML = `
+        <h2>Quiz beendet!</h2>
+        <p>Sie haben ${score} von ${quizData.length} Fragen richtig beantwortet.</p>
+        <p>Das entspricht ${percentage}%</p>
+        <div class="btn-container">
+            <button class="btn btn-restart" onclick="restartQuiz()">Quiz neu starten</button>
+            <button class="btn btn-nav" onclick="reviewQuiz()">Antworten überprüfen</button>
+        </div>
+    `;
+        finalScoreElement.style.display = 'block';
+
+        // Save quiz results
+        const results = {
+            timestamp: quizMetadata.timestamp,
+            user: quizMetadata.user,
+            score: score,
+            totalQuestions: quizData.length,
+            percentage: percentage
+        };
+        console.log('Quiz Results:', results);
+    }
+
+    function reviewQuiz() {
+        getElement('final-score').style.display = 'none';
+        getElement('quiz-content').style.display = 'block';
+        currentQuestionIndex = 0;
+        displayQuestion();
+    }
+
+    function restartQuiz() {
+        currentQuestionIndex = 0;
+        score = 0;
+        answeredQuestions = new Array(quizData.length).fill(false);
+        quizData.forEach(question => question.lastAnswer = undefined);
+        getElement('quiz-content').style.display = 'block';
+        getElement('final-score').style.display = 'none';
+        displayQuestion();
+    }
+
+    // Initialize quiz
+    window.onload = function () {
+        displayQuestion();
+        console.log('Quiz started at:', quizMetadata.timestamp);
+        console.log('User:', quizMetadata.user);
+    };
+</script>
+</body>
+</html>
